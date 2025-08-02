@@ -1,11 +1,24 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
+import AuthModal from '@/components/auth/AuthModal';
+import SalaryChart from '@/components/charts/SalaryChart';
+import { useAuthStore } from '@/store/authStore';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  
+  if (isAuthenticated) {
+    navigate('/dashboard');
+    return null;
+  }
   const salaryData = [
     { position: 'Бармен', salary: '2,500,000 - 3,200,000', candidates: 180 },
     { position: 'Бариста', salary: '2,200,000 - 2,800,000', candidates: 95 },
@@ -102,7 +115,7 @@ const Index = () => {
               <a href="#pricing" className="text-sm hover:text-primary transition-colors">Тарифы</a>
               <a href="#contact" className="text-sm hover:text-primary transition-colors">Контакты</a>
             </nav>
-            <Button>Оставить заявку</Button>
+            <Button onClick={() => setIsAuthModalOpen(true)}>Войти в кабинет</Button>
           </div>
         </div>
       </header>
@@ -141,7 +154,7 @@ const Index = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8 py-6">
+              <Button size="lg" className="text-lg px-8 py-6" onClick={() => setIsAuthModalOpen(true)}>
                 <Icon name="Phone" size={20} className="mr-2" />
                 Найти персонал
               </Button>
@@ -184,58 +197,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Candidates & Salary Data */}
+      {/* Interactive Salary Chart */}
       <section id="candidates" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Наши кандидаты</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Актуальная статистика по зарплатам и количеству доступных специалистов
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {salaryData.map((item, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{item.position}</CardTitle>
-                    <Badge variant="secondary">{item.candidates}</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Зарплата (сум/мес)</p>
-                      <p className="font-semibold text-primary">{item.salary}</p>
-                    </div>
-                    <div className="pt-2">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Доступность</span>
-                        <span className="text-green-600">{Math.round((item.candidates / 1027) * 100)}%</span>
-                      </div>
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div 
-                          className="bg-accent h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(item.candidates / 220) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-muted-foreground mb-6">
-              Данные обновляются еженедельно • Последнее обновление: 1 августа 2025
-            </p>
-            <Button variant="outline" size="lg">
-              <Icon name="Download" size={20} className="mr-2" />
-              Скачать полную статистику
-            </Button>
-          </div>
+          <SalaryChart />
         </div>
       </section>
 
@@ -340,7 +305,7 @@ const Index = () => {
                     <Textarea placeholder="Опишите, какой персонал вам нужен и основные требования" />
                   </div>
 
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={() => setIsAuthModalOpen(true)}>
                     <Icon name="Send" size={20} className="mr-2" />
                     Отправить заявку
                   </Button>
@@ -430,6 +395,11 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={() => setIsAuthModalOpen(false)} 
+      />
     </div>
   );
 };
